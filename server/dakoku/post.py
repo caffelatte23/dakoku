@@ -24,15 +24,15 @@ def lambda_handler(event, context):
 
     item = get_record(body["userId"], time.strftime("%Y-%m-%d"))
 
-    if item is not None:
-        item["endTime"] = time.strftime("%H:%M")
-    else:
+    if body["IsAttend"]:
         item = {
             'userId': body["userId"],
             'date': time.strftime("%Y-%m-%d"),
             "startTime": time.strftime("%H:%M"),
             "endTime": ''
         }
+    else:
+        item["endTime"] = time.strftime("%H:%M")
 
     table.put_item(Item=item)
 

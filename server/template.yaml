@@ -35,6 +35,26 @@ Resources:
             Path: /dakoku
             Method: post
 
+  DakokuGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dakoku/
+      Handler: get.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          table: dakoku-table
+      Policies:
+        - AmazonDynamoDBFullAccess
+        - AWSLambdaDynamoDBExecutionRole
+        - AWSLambdaBasicExecutionRole
+      Events:
+        Dakoku:
+          Type: Api
+          Properties:
+            Path: /dakoku
+            Method: get
+
   DakokuTable:
     Type: AWS::DynamoDB::Table
     Properties:
