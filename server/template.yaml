@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  dakoku-app
+
+  Sample SAM Template for dakoku-app
+
+Globals:
+  Function:
+    Timeout: 3
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type, Authorization, Accept, timeout'"
+
+Resources:
+  DakokuPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dakoku/
+      Handler: post.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          table: dakoku-table
+      Policies:
+        - AmazonDynamoDBFullAccess
+        - AWSLambdaDynamoDBExecutionRole
+        - AWSLambdaBasicExecutionRole
+      Events:
+        Dakoku:
+          Type: Api
+          Properties:
+            Path: /dakoku
+            Method: post
+
+  DakokuTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: dakoku-table
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: date
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
