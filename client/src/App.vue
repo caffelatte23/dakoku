@@ -1,29 +1,30 @@
 <script setup lang="ts">
 import axios from "axios";
 import dayjs from "dayjs";
-import { onMounted, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 
-type status = "NOT_WORKING" | "WORKING";
+type Status = "NOT_WORKING" | "WORKING" | "NULL";
 
-interface workingStatus {
+interface WorkingStatus {
   userId: string;
   date: string;
   startTime: string;
   endTime: string;
-  status: status;
+  status: Status;
 }
 
-const currentStatus = ref<workingStatus>({
+const currentStatus = ref<WorkingStatus>({
   userId: "1",
   date: dayjs().format("YYYY-MM-DD"),
   startTime: "",
   endTime: "",
-  status: "NOT_WORKING",
+  status: "NULL",
 });
 
-const Status: { NOT_WORKING: string; WORKING: string } = {
+const status: { [key in Status]: string } = {
   NOT_WORKING: "勤務時間外",
   WORKING: "勤務中",
+  NULL: "-",
 };
 
 // 出勤時
@@ -34,6 +35,7 @@ const onAttend = (): void => {
     time: dayjs().format("YYYY-MM-DD HH:mm"),
     IsAttend: true,
   });
+  currentStatus.value.status = "WORKING";
 };
 
 // 退勤時
@@ -44,6 +46,7 @@ const onLeave = (): void => {
     time: dayjs().format("YYYY-MM-DD HH:mm"),
     IsAttend: false,
   });
+  currentStatus.value.status = "NOT_WORKING";
 };
 
 const refreshStatus = (): void => {
@@ -59,12 +62,12 @@ const refreshStatus = (): void => {
     });
 };
 
-onMounted((): void => refreshStatus());
+onBeforeMount((): void => refreshStatus());
 </script>
 
 <template>
   <div class="body">
-    <span>現在のステータス: {{ Status[currentStatus.status] }}</span>
+    <span>現在のステータス: {{ status[currentStatus.status] }}</span>
     <div class="button-container">
       <button class="button" @click="onAttend">出勤</button>
       <button class="button" @click="onLeave">退勤</button>
