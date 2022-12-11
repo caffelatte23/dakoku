@@ -8,6 +8,12 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+    CodeUri: dakoku/
+    Runtime: python3.9
+    Environment:
+      Variables:
+        log_table: dakoku-table
+        setting_table: dakoku-setting-table
   Api:
     Cors:
       AllowOrigin: "'*'"
@@ -18,12 +24,7 @@ Resources:
   DakokuPostFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: dakoku/
-      Handler: post.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          table: dakoku-table
+      Handler: app.logs.post.lambda_handler
       Policies:
         - AmazonDynamoDBFullAccess
         - AWSLambdaDynamoDBExecutionRole
@@ -38,12 +39,7 @@ Resources:
   DakokuGetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: dakoku/
-      Handler: get.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          table: dakoku-table
+      Handler: app.logs.get.lambda_handler
       Policies:
         - AmazonDynamoDBFullAccess
         - AWSLambdaDynamoDBExecutionRole
@@ -55,6 +51,7 @@ Resources:
             Path: /dakoku
             Method: get
 
+  # 勤怠記録管理用テーブル
   DakokuTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -69,6 +66,21 @@ Resources:
           KeyType: HASH
         - AttributeName: date
           KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # 出勤時間記録用
+  DakokuSettingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: dakoku-setting-table
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5

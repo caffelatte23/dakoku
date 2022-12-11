@@ -3,18 +3,9 @@ import os
 from datetime import datetime
 
 import boto3
+from .utils import *
 
-table = boto3.resource('dynamodb').Table(os.environ["table"])
-
-
-def get_record(userId, date):
-    response = table.get_item(
-        Key={
-            'userId': str(userId),
-            'date': date
-        }
-    )
-    return response["Item"] if "Item" in response.keys() else None
+table = boto3.resource('dynamodb').Table(os.environ["log-table"])
 
 
 def lambda_handler(event, context):
